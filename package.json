@@ -8,7 +8,8 @@
     "node": "12.20.0"
   },
   "scripts": {
-    "heroku-postbuild": "cd todo_app && npm install && npm run build && cd .. && npm run deploy",
-    "deploy": "cp -a todo_app/build/. public/"
+    "build": "cd todo_app && npm install && npm run build && cd ..",
+    "deploy": "cp -a todo_app/build/. public/",
+    "postinstall": "npm run build && npm run deploy && echo 'Todolist built!'"
   }
 }
