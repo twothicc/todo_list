@@ -26,5 +26,8 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
+# Ignore database configurations
+/config/database.yml
+
 # Production
 /public
