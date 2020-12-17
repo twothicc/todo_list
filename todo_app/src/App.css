@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap');
+* {
+    font-family: 'Raleway', sans-serif;
+}
+
+.appbar {
+    position: fixed;
+    width: 100%;
+    height: 'auto';
+}
+
+
+.textbox {
+    background-color: white;
+    border-Color: transparent;
+    border-Radius: 10px;
+    width: 30%;  
+}
+
+.toolbar_container {
+    position: fixed;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+}
