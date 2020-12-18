@@ -32,6 +32,7 @@ class Home extends Component {
             isCategoryCreated: false,
             isCategoryDeleted: false
         }
+        this.setTodos = this.setTodos.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -60,8 +61,8 @@ class Home extends Component {
 
     setTodos() {
         if (this.props.location.aboutProps === undefined) {
-            this.fetchTodos();
             this.fetchCategories();
+            this.fetchTodos();
             console.log('reload');
         } else {
             this.setState({
