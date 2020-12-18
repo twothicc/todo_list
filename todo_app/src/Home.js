@@ -69,7 +69,7 @@ class Home extends Component {
                 Todos: this.props.location.aboutProps.Todos,
                 Categories: this.props.location.aboutProps.Categories,
             })
-            if (autocomplete_categories.length === 0) {
+            if (autocomplete_categories.length === 0 && this.props.location.aboutProps.autocomplete_categories !== undefined) {
                 autocomplete_categories = this.props.location.aboutProps.autocomplete_categories.filter(listing => listing['title'] !== 'All')
             }
             console.log("use props");

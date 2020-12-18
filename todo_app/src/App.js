@@ -34,7 +34,7 @@ class App extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if (prevState.isFilter !== this.state.isFilter) {
-            this.props.history.push({pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories}});
+            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories}});
             console.log("filter done");
             //Need to reset isFilter
             this.setState({
