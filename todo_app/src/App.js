@@ -21,31 +21,18 @@ class App extends Component {
             Categories: {},
             todo_data: false,
             category_data: false,
-            value: '',
-            // isFilter: false
+            value: ''
         }
         this.handleCategoryChange = this.handleCategoryChange.bind(this);
         this.handleFilter = this.handleFilter.bind(this);
     }
 
     componentDidMount() {
-        console.log('appbar mounting');
         this.setCategories();
         this.setTodos();  
     }
 
-    // componentDidUpdate(prevProps, prevState) {
-    //     if (prevState.isFilter !== this.state.isFilter) {
-    //         this.props.history.replace({pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories}});
-    //         console.log("filter done");
-    //         //Need to reset isFilter
-    //         this.setState({
-    //             isFilter: false
-    //         })
-    //     }
-    // }
-
-
+    //Wait till todos are fetched and parsed. Handles null case
     async setTodos() {
         const response = await fetch(todo_api_url);
         if (response !== null) {
@@ -56,25 +43,9 @@ class App extends Component {
             })
         }
 
-        // .then(responses => {
-            
-        //     if (responses === null) {
-        //         return null;
-        //     } else {
-        //         return responses.json();
-        //     }
-        // })
-        // .then(parsed_responses => {
-        //     //console.log("parsed responses"+parsed_responses)
-        //     if (parsed_responses !== null) {
-        //         this.setState({
-        //             Todos: parsed_responses,
-        //             todo_data: true
-        //         })
-        //     }
-        // })
     }
 
+    //Wait till categories are fetched and parsed. Handles null case
     async setCategories() {
         const response = await fetch(categorty_api_url);
         if (response !== null) {
@@ -94,43 +65,17 @@ class App extends Component {
                 category_data: true
             })
         }
-
-        // .then(responses => {
-        //     if (responses === null) {
-        //         return null;
-        //     } else {
-        //         return responses.json();
-        //     }
-        // })
-        // .then(parsed_responses => {
-        //     if (parsed_responses !== null) {
-        //         var temp = {};
-        //         for (let category of parsed_responses) {
-        //             temp[category.id] = category.name;
-        //         }
-        //         if (autocomplete_categories.length === 0) {
-        //             autocomplete_categories.push({ title: 'All' });
-        //             for (let category of parsed_responses) {
-        //                 autocomplete_categories.push({ title: category.name });
-        //             }
-        //         }
-        //         this.setState({
-        //             Categories: temp,
-        //             category_data: true
-        //         })
-        //     }
-        // })
     }
 
+    //Changes value dynamically as user types into filter bar
     handleCategoryChange(event, values) {
         this.setState({
             value: values
         })
-        //console.log("value change" + this.state.value)
     }
 
+    //Waits till filterered records are fetched and parsed. Handles null case
     async handleFilter() {
-        //console.log(this.state.value);
         var api_url = '';
         if (this.state.value === "All") {
             api_url = todo_api_url
@@ -143,43 +88,40 @@ class App extends Component {
             const parsed_response = await response.json();
             this.props.history.replace({pathname: '/Home', aboutProps: {Todos: parsed_response, Categories: this.state.Categories}});
         }
-        // .then(responses => {
-        //     if (responses === null) {
-        //         return null;
-        //     } else {
-        //         return responses.json();
-        //     }
-        // })
-        // .then(parsed_responses => {
-        //     //console.log("filter results"+parsed_responses)
-        //     if (parsed_responses !== null) {
-        //         this.setState({
-        //             Todos: parsed_responses,
-        //             isFilter: true
-        //         })
-        //     }
-        // })
         
     }
 
     render() {
         console.log(this.state.Todos);
         console.log(this.state.Categories);
+        console.log(window.location.hash);
         return (
             <div>
+
                 <AppBar className = 'appbar'>
+
                     <Toolbar>
+
                         <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'space-between', width:'100%'}}>
+
                             <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'space-between', width:'15%'}}>
+
                                 <h1>TodoList</h1>
 
                                 <nav>
+
                                     <Link to = {{pathname: '/Home'}} style={{textDecoration:'none', color:'white'}}>
+
                                         <h4>Home</h4>
+
                                     </Link>
+
                                 </nav>
+
                             </div>
+
                             <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'flex-end', width:'85%'}}>
+
                                 <Autocomplete
                                     id="search_todo"
                                     options={autocomplete_categories}
@@ -187,18 +129,36 @@ class App extends Component {
                                     className = 'textbox'
                                     defaultValue = {autocomplete_categories[0]}
                                     onInputChange = {this.handleCategoryChange}
-                                    renderInput={(params) => <TextField {...params} label="Filter By Categories" variant="outlined"/>}
+                                    renderInput={(params) => 
+                                        <TextField 
+                                            {...params} 
+                                            label="Filter By Categories" 
+                                            variant="outlined"
+                                        />}
                                 />
-                                <Button variant="outlined" onClick={this.handleFilter} style={{backgroundColor: 'white', marginInline: "1%"}}>Filter</Button>
+
+                                <Button 
+                                    variant="outlined" 
+                                    onClick={this.handleFilter} 
+                                    style={{backgroundColor: 'white', marginInline: "1%"}}
+                                >
+                                    Filter
+                                </Button>
+
                             </div>
+
                         </div>
+
                     </Toolbar>
+
                 </AppBar>
+
                 {(this.state.todo_data === true && this.state.category_data === true)
-                    ? window.location.pathname === '/' 
+                    ? window.location.hash === '#/'
                         ? <Redirect to ={{pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories, autocomplete_categories: autocomplete_categories}}}/>
                         : <br/>
                     : <br/>}
+
             </div>
         )
     }

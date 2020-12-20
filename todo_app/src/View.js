@@ -30,7 +30,6 @@ class View extends Component {
             category: '',
             categories: {},
             open: false,
-            // isDelete: false
         }
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -45,12 +44,7 @@ class View extends Component {
         this.setTodo();
     }
 
-    // componentDidUpdate(prevProps, prevState) {
-    //     if (prevState.isDelete !== this.state.isDelete) {
-    //         this.props.history.push('/Home')
-    //     }
-    // }
-
+    //Reduces need to fetch data from database but simply using aboutProps in URL if made available
     setTodo() {
         if (this.props.location.aboutProps === undefined) {
             this.fetchTodo();
@@ -73,8 +67,9 @@ class View extends Component {
         
     }
 
+    //Waits for todo to be fetched and parsed. Handles null case. Need to be using window.location.hash instead since hashrouter is used now
     async fetchTodo() {
-        var temp = window.location.pathname.split('/');
+        var temp = window.location.hash.split('/');
         var id = temp[temp.length - 1];
         const response = await fetch(todo_api_url + "/" + id, {
             method: 'GET'
@@ -88,15 +83,9 @@ class View extends Component {
                 category_id: parsed_response.category_id
             })
         }
-        // .then(response => response.json())
-        // .then(parsed_response => this.setState({
-        //     id: parsed_response.id,
-        //     name: parsed_response.name,
-        //     body: parsed_response.body,
-        //     category_id: parsed_response.category_id
-        // }))
     }
 
+    //Waits for categories to be fetched and parsed. Handles null case
     async fetchCategories() {
         const response = await fetch(category_api_url, {
             method: 'GET'
@@ -107,6 +96,7 @@ class View extends Component {
             for (let category of parsed_response) {
                 temp[category.id] = category.name;
             }
+            //If autocomplete options are not empty, this would create duplicate fixed options. Hence check required
             if (autocomplete_categories.length === 0) {
                 for (let category of parsed_response) {
                     autocomplete_categories.push({title: category.name});
@@ -119,51 +109,29 @@ class View extends Component {
                 category: this.state.categories[this.state.category_id]
             })
         }
-        // .then(responses => {
-        //     if (responses === null) {
-        //         return null;
-        //     } else {
-        //         return responses.json();
-        //     }
-        // })
-        // .then(parsed_responses => {
-        //     if (parsed_responses !== null) {
-        //         var temp = {};
-        //         for (let category of parsed_responses) {
-        //             temp[category.id] = category.name;
-        //         }
-        //         if (autocomplete_categories.length === 0) {
-        //             for (let category of parsed_responses) {
-        //                 autocomplete_categories.push({title: category.name});
-        //             }
-        //         }
-        //         this.setState({
-        //             categories: temp
-        //         })
-        //         this.setState({
-        //             category: this.state.categories[this.state.category_id]
-        //         })
-        //     }
-        // })
     }
 
+    //Opens dialog
     handleClickOpen() {
         this.setState({
             open: true
         })
     };
     
+    //Closes dialog
     handleClose() {
         this.setState({
             open: false
         })
     };
 
+    //preventDefault is called on the event when submitting the form to prevent a browser reload/refresh.
     handleSubmit(event) {
         event.preventDefault();
         this.formSubmit(event.target);
     }
 
+    //Changes the current state to match the updated record
     updateState(data) {
         this.setState({
             name: data.name,
@@ -175,34 +143,38 @@ class View extends Component {
         })
     }
 
+    //No need to wait reload page. Simply update state to match updated record
     async formSubmit(formData) {
         var data = new FormData(formData);
         const category_input = data.get('todo[category_id]');
         const category_id = Object.keys(this.state.categories).find(key => this.state.categories[key] === category_input);
         data.set('todo[category_id]', category_id);
-        await fetch(todo_api_url + "/" + this.state.id, {
+        const response = await fetch(todo_api_url + "/" + this.state.id, {
             method: "PUT",
             mode: 'cors',
             body: data
-        })
-        .then(response => response.json())
-        .then(parsed_response => this.updateState(parsed_response));
+        });
+        const parsed_response = await response.json();
+        this.updateState(parsed_response);
         this.handleClose();
         console.log("updated");
     }
 
+    //Changes name dynamically as user inputs in Textfield
     handleFormTitleChange(event) {
         this.setState({
             name: event.target.value
         })
     }
 
+    //Same as above
     handleFormContentChange(event) {
         this.setState({
             body: event.target.value
         })
     }
 
+    //wait for current record to be deleted. If deleted, then record is gone, go back to home page
     async handleDelete() {
         const response = await fetch(todo_api_url + "/" + this.state.id, {
             method: "DELETE",
@@ -211,16 +183,12 @@ class View extends Component {
         if (response.ok) {
             this.props.history.push('/Home')
         }
-        // .then(response => {
-        //     this.setState({
-        //         isDelete: response.ok
-        //     })
-        // })
     }
 
 
 
     render() {
+        //Need to find the index of the current record's category in autocomplete options since mui autocomplete requires it to set default value
         var indexofautocompletecategories = 0;
         for (let i = 0; i < autocomplete_categories.length; i = i + 1 ) {
             if (autocomplete_categories[i]['title'] === this.state.category) {
@@ -229,22 +197,45 @@ class View extends Component {
         }
         return (
             <div className='viewcard_container'>
+
                 <Card className='view_container'>
+
                     <CardContent style={{width: "100%"}}>
+
                         <h1 style = {{textAlign: "center", fontWeight: 'bold'}}>{this.state.name}</h1>
+
                         <hr/>
+
                         <h4 style = {{textAlign: "justify", width:'90%', marginInline:'auto'}}>{this.state.body}</h4>
+
                         <h5 style={{width:'90%', marginInline:'auto', color: 'cornflowerblue', textAlign: 'justify'}}>{this.state.category}</h5>
+
                     </CardContent>
+
                     <CardActions className='icon_container'>
-                        <Button size='small' startIcon={<EditIcon/>} onClick={this.handleClickOpen}/>
-                        <Dialog scroll='paper' fullWidth open={this.state.open} onClose={this.handleClose} aria-labelledby="form-dialog-title">
+
+                        <Button 
+                            size='small' 
+                            startIcon={<EditIcon/>} 
+                            onClick={this.handleClickOpen}
+                        />
+
+                        <Dialog 
+                            scroll='paper' 
+                            fullWidth open={this.state.open} 
+                            onClose={this.handleClose} 
+                            aria-labelledby="form-dialog-title"
+                        >
+
                             <DialogTitle id="form-dialog-title">Edit Todo</DialogTitle>
+
                             <form
                                 onSubmit={this.handleSubmit}
                                 id='todo_form'
                                 autoComplete='off'>  
+
                                 <DialogContent>
+
                                     <TextField
                                         autoFocus
                                         margin="dense"
@@ -257,6 +248,7 @@ class View extends Component {
                                         multiline
                                         fullWidth
                                     />
+
                                     <TextField
                                         id='body_input'
                                         margin='dense'
@@ -268,27 +260,45 @@ class View extends Component {
                                         multiline
                                         fullWidth
                                     />
+
                                     <Autocomplete
                                         id="category_input"
                                         options={autocomplete_categories}
                                         getOptionLabel={(option) => option.title}
                                         defaultValue = {autocomplete_categories[indexofautocompletecategories]}
-                                        renderInput={(params) => <TextField {...params} label="Category" name='todo[category_id]' margin='dense' id='category_id_input' type='text' multiline fullWidth/>}
+                                        renderInput={(params) => 
+                                            <TextField 
+                                                {...params} 
+                                                label="Category" 
+                                                name='todo[category_id]' 
+                                                margin='dense' 
+                                                id='category_id_input' 
+                                                type='text' 
+                                                multiline 
+                                                fullWidth
+                                            />}
                                     />
+
                                 </DialogContent>
+
                                 <DialogActions>
-                                    <Button onClick={this.handleClose} color="primary">
-                                        Cancel
-                                    </Button>
-                                    <Button type='submit' color="primary">
-                                        Edit
-                                    </Button>
+
+                                    <Button onClick={this.handleClose} color="primary">Cancel</Button>
+
+                                    <Button type='submit' color="primary">Edit</Button>
+
                                 </DialogActions>
+
                             </form>
+
                         </Dialog>
+
                         <Button size='medium' startIcon={<DeleteIcon/>} onClick={this.handleDelete}/>
+
                     </CardActions>
+
                 </Card>
+
             </div>
         )
     }
