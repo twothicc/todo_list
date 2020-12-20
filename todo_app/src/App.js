@@ -19,77 +19,107 @@ class App extends Component {
         this.state = {
             Todos: [],
             Categories: {},
-            data: false,
+            todo_data: false,
+            category_data: false,
             value: '',
-            isFilter: false
+            // isFilter: false
         }
         this.handleCategoryChange = this.handleCategoryChange.bind(this);
         this.handleFilter = this.handleFilter.bind(this);
     }
 
     componentDidMount() {
+        console.log('appbar mounting');
         this.setCategories();
         this.setTodos();  
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevState.isFilter !== this.state.isFilter) {
-            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories}});
-            console.log("filter done");
-            //Need to reset isFilter
+    // componentDidUpdate(prevProps, prevState) {
+    //     if (prevState.isFilter !== this.state.isFilter) {
+    //         this.props.history.replace({pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories}});
+    //         console.log("filter done");
+    //         //Need to reset isFilter
+    //         this.setState({
+    //             isFilter: false
+    //         })
+    //     }
+    // }
+
+
+    async setTodos() {
+        const response = await fetch(todo_api_url);
+        if (response !== null) {
+            const parsed_response = await response.json();
             this.setState({
-                isFilter: false
+                Todos: parsed_response,
+                todo_data: true
             })
         }
-    }
 
-    setTodos() {
-        fetch(todo_api_url)
-        .then(responses => {
+        // .then(responses => {
             
-            if (responses === null) {
-                return null;
-            } else {
-                return responses.json();
-            }
-        })
-        .then(parsed_responses => {
-            //console.log("parsed responses"+parsed_responses)
-            if (parsed_responses !== null) {
-                this.setState({
-                    Todos: parsed_responses,
-                    data: true
-                })
-            }
-        })
+        //     if (responses === null) {
+        //         return null;
+        //     } else {
+        //         return responses.json();
+        //     }
+        // })
+        // .then(parsed_responses => {
+        //     //console.log("parsed responses"+parsed_responses)
+        //     if (parsed_responses !== null) {
+        //         this.setState({
+        //             Todos: parsed_responses,
+        //             todo_data: true
+        //         })
+        //     }
+        // })
     }
 
-    setCategories() {
-        fetch(categorty_api_url)
-        .then(responses => {
-            if (responses === null) {
-                return null;
-            } else {
-                return responses.json();
+    async setCategories() {
+        const response = await fetch(categorty_api_url);
+        if (response !== null) {
+            const parsed_response = await response.json();
+            var temp = {};
+            for (let category of parsed_response) {
+                temp[category.id] = category.name;
             }
-        })
-        .then(parsed_responses => {
-            if (parsed_responses !== null) {
-                var temp = {};
-                for (let category of parsed_responses) {
-                    temp[category.id] = category.name;
+            if (autocomplete_categories.length === 0) {
+                autocomplete_categories.push({ title: 'All' });
+                for (let category of parsed_response) {
+                    autocomplete_categories.push({ title: category.name });
                 }
-                if (autocomplete_categories.length === 0) {
-                    autocomplete_categories.push({ title: 'All' });
-                    for (let category of parsed_responses) {
-                        autocomplete_categories.push({ title: category.name });
-                    }
-                }
-                this.setState({
-                    Categories: temp
-                })
             }
-        })
+            this.setState({
+                Categories: temp,
+                category_data: true
+            })
+        }
+
+        // .then(responses => {
+        //     if (responses === null) {
+        //         return null;
+        //     } else {
+        //         return responses.json();
+        //     }
+        // })
+        // .then(parsed_responses => {
+        //     if (parsed_responses !== null) {
+        //         var temp = {};
+        //         for (let category of parsed_responses) {
+        //             temp[category.id] = category.name;
+        //         }
+        //         if (autocomplete_categories.length === 0) {
+        //             autocomplete_categories.push({ title: 'All' });
+        //             for (let category of parsed_responses) {
+        //                 autocomplete_categories.push({ title: category.name });
+        //             }
+        //         }
+        //         this.setState({
+        //             Categories: temp,
+        //             category_data: true
+        //         })
+        //     }
+        // })
     }
 
     handleCategoryChange(event, values) {
@@ -99,7 +129,7 @@ class App extends Component {
         //console.log("value change" + this.state.value)
     }
 
-    handleFilter() {
+    async handleFilter() {
         //console.log(this.state.value);
         var api_url = '';
         if (this.state.value === "All") {
@@ -108,28 +138,31 @@ class App extends Component {
             api_url = todo_api_url + '/search/' + Object.keys(this.state.Categories).find(key => this.state.Categories[key] === this.state.value);
         }
         console.log("filter url" + api_url)
-        fetch(api_url)
-        .then(responses => {
-            if (responses === null) {
-                return null;
-            } else {
-                return responses.json();
-            }
-        })
-        .then(parsed_responses => {
-            //console.log("filter results"+parsed_responses)
-            if (parsed_responses !== null) {
-                this.setState({
-                    Todos: parsed_responses,
-                    isFilter: true
-                })
-            }
-        })
+        const response = await fetch(api_url);
+        if (response !== null) {
+            const parsed_response = await response.json();
+            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: parsed_response, Categories: this.state.Categories}});
+        }
+        // .then(responses => {
+        //     if (responses === null) {
+        //         return null;
+        //     } else {
+        //         return responses.json();
+        //     }
+        // })
+        // .then(parsed_responses => {
+        //     //console.log("filter results"+parsed_responses)
+        //     if (parsed_responses !== null) {
+        //         this.setState({
+        //             Todos: parsed_responses,
+        //             isFilter: true
+        //         })
+        //     }
+        // })
         
     }
 
     render() {
-        //console.log(window.location.href)
         console.log(this.state.Todos);
         console.log(this.state.Categories);
         return (
@@ -161,7 +194,7 @@ class App extends Component {
                         </div>
                     </Toolbar>
                 </AppBar>
-                {(this.state.data)
+                {(this.state.todo_data === true && this.state.category_data === true)
                     ? window.location.pathname === '/' 
                         ? <Redirect to ={{pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories, autocomplete_categories: autocomplete_categories}}}/>
                         : <br/>

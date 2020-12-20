@@ -29,8 +29,8 @@ class Home extends Component {
             open: false,
             formName: '',
             formBody: '',
-            isCategoryCreated: false,
-            isCategoryDeleted: false
+            // isCategoryCreated: false,
+            // isCategoryDeleted: false
         }
         this.setTodos = this.setTodos.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
@@ -52,74 +52,97 @@ class Home extends Component {
         if (prevProps.location.aboutProps !== this.props.location.aboutProps) {
             this.setTodos();
         }
-        if (prevState.isCategoryCreated !== this.state.isCategoryCreated || prevState.isCategoryDeleted !== this.state.isCategoryDeleted) {
+        // if (prevState.isCategoryCreated !== this.state.isCategoryCreated || prevState.isCategoryDeleted !== this.state.isCategoryDeleted) {
             
-            window.location.replace('/');
+        //     window.location.replace('/');
             
-        }
+        // }
     }
 
     setTodos() {
-        if (this.props.location.aboutProps === undefined) {
+        // if (this.props.location.aboutProps === undefined) {
             this.fetchCategories();
             this.fetchTodos();
             console.log('reload');
-        } else {
+        // } else {
+        //     console.log(this.props.location.aboutProps);
+        //     this.setState({
+        //         Todos: this.props.location.aboutProps.Todos,
+        //         Categories: this.props.location.aboutProps.Categories,
+        //     })
+        //     if (autocomplete_categories.length === 0 && this.props.location.aboutProps.autocomplete_categories !== undefined) {
+        //         autocomplete_categories = this.props.location.aboutProps.autocomplete_categories.filter(listing => listing['title'] !== 'All')
+        //     }
+        //     console.log("home use props");
+        // }
+    }
+
+    async fetchTodos() {
+        const response = await fetch(todo_api_url);
+        if (response !== null) {
+            const parsed_response = await response.json();
             this.setState({
-                Todos: this.props.location.aboutProps.Todos,
-                Categories: this.props.location.aboutProps.Categories,
+                Todos: parsed_response
             })
-            if (autocomplete_categories.length === 0 && this.props.location.aboutProps.autocomplete_categories !== undefined) {
-                autocomplete_categories = this.props.location.aboutProps.autocomplete_categories.filter(listing => listing['title'] !== 'All')
-            }
-            console.log("use props");
         }
-    }
-
-    fetchTodos() {
-        fetch(todo_api_url)
-        .then(responses => {
+        // .then(responses => {
             
-            if (responses === null) {
-                return null;
-            } else {
-                return responses.json();
-            }
-        })
-        .then(parsed_responses => {
-            if (parsed_responses !== null) {
-                this.setState({
-                    Todos: parsed_responses
-                })
-            }
-        })
+        //     if (responses === null) {
+        //         return null;
+        //     } else {
+        //         return responses.json();
+        //     }
+        // })
+        // .then(parsed_responses => {
+        //     if (parsed_responses !== null) {
+        //         this.setState({
+        //             Todos: parsed_responses
+        //         })
+        //     }
+        // })
     }
 
-    fetchCategories() {
-        fetch(category_api_url)
-        .then(responses => {
-            if (responses === null) {
-                return null;
-            } else {
-                return responses.json();
+    async fetchCategories() {
+        const response = await fetch(category_api_url);
+        
+        if (response !== null) {
+            const parsed_response = await response.json();
+            var temp = {};
+            for (let category of parsed_response) {
+                temp[category.id] = category.name;
             }
-        })
-        .then(parsed_responses => {
-            if (parsed_responses !== null) {
-                var temp = {};
-                for (let category of parsed_responses) {
-                    temp[category.id] = category.name;
+            if (autocomplete_categories.length === 0) {
+                for (let category of parsed_response) {
+                    autocomplete_categories.push({title: category.name});
                 }
-                if (autocomplete_categories.length === 0) {
-                    for (let category of parsed_responses) {
-                        autocomplete_categories.push({title: category.name});
-                    }
-                }
-                this.setState({
-                    Categories: temp
-                })
             }
-        })
+            this.setState({
+                Categories: temp
+            })
+        }
+        // .then(responses => {
+        //     if (responses === null) {
+        //         return null;
+        //     } else {
+        //         return responses.json();
+        //     }
+        // })
+        // .then(parsed_responses => {
+        //     if (parsed_responses !== null) {
+        //         var temp = {};
+        //         for (let category of parsed_responses) {
+        //             temp[category.id] = category.name;
+        //         }
+        //         if (autocomplete_categories.length === 0) {
+        //             for (let category of parsed_responses) {
+        //                 autocomplete_categories.push({title: category.name});
+        //             }
+        //         }
+        //         this.setState({
+        //             Categories: temp
+        //         })
+        //     }
+        // })
     }
 
 
@@ -175,23 +198,29 @@ class Home extends Component {
     //appbar also has to change its autocomplete_categories, so there is a need to reload
     async handleCategoryCreate(formData) {
         var data = new FormData(formData);
-        await fetch(category_api_url, {
+        const response = await fetch(category_api_url, {
             method: "POST",
             mode: 'cors',
             body: data
         })
-        .then(response => this.setState({
-            isCategoryCreated: response.ok
-        }));
+        if (response.ok) {
+            window.location.replace('/');
+        }
+        // .then(response => this.setState({
+        //     isCategoryCreated: response.ok
+        // }));
     }
 
-    handleCategoryDelete(event) {
-        fetch(category_api_url + "/" + event.currentTarget.id, {
+    async handleCategoryDelete(event) {
+        const response =  await fetch(category_api_url + "/" + event.currentTarget.id, {
             method: 'DELETE'
         })
-        .then(response => this.setState({
-            isCategoryDeleted: response.ok
-        }))
+        if (response.ok) {
+            window.location.replace('/');
+        }
+        // .then(response => this.setState({
+        //     isCategoryDeleted: response.ok
+        // }))
     }
 
     async formSubmit(formData) {
@@ -213,7 +242,7 @@ class Home extends Component {
     render() {
         console.log(this.state.Todos);
         console.log(this.state.Categories);
-        console.log("is category deleted" + this.state.isCategoryDeleted);
+        // console.log("is category deleted" + this.state.isCategoryDeleted);
         return (
             <div style ={{width: '100%'}}>
 

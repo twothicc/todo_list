@@ -30,7 +30,7 @@ class View extends Component {
             category: '',
             categories: {},
             open: false,
-            isDelete: false
+            // isDelete: false
         }
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -45,11 +45,11 @@ class View extends Component {
         this.setTodo();
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if (prevState.isDelete !== this.state.isDelete) {
-            this.props.history.push('/Home')
-        }
-    }
+    // componentDidUpdate(prevProps, prevState) {
+    //     if (prevState.isDelete !== this.state.isDelete) {
+    //         this.props.history.push('/Home')
+    //     }
+    // }
 
     setTodo() {
         if (this.props.location.aboutProps === undefined) {
@@ -73,51 +73,78 @@ class View extends Component {
         
     }
 
-    fetchTodo() {
+    async fetchTodo() {
         var temp = window.location.pathname.split('/');
         var id = temp[temp.length - 1];
-        fetch(todo_api_url + "/" + id, {
+        const response = await fetch(todo_api_url + "/" + id, {
             method: 'GET'
-        })
-        .then(response => response.json())
-        .then(parsed_response => this.setState({
-            id: parsed_response.id,
-            name: parsed_response.name,
-            body: parsed_response.body,
-            category_id: parsed_response.category_id
-        }))
+        });
+        if (response !== null) {
+            const parsed_response = await response.json();
+            this.setState({
+                id: parsed_response.id,
+                name: parsed_response.name,
+                body: parsed_response.body,
+                category_id: parsed_response.category_id
+            })
+        }
+        // .then(response => response.json())
+        // .then(parsed_response => this.setState({
+        //     id: parsed_response.id,
+        //     name: parsed_response.name,
+        //     body: parsed_response.body,
+        //     category_id: parsed_response.category_id
+        // }))
     }
 
-    fetchCategories() {
-        fetch(category_api_url, {
+    async fetchCategories() {
+        const response = await fetch(category_api_url, {
             method: 'GET'
-        })
-        .then(responses => {
-            if (responses === null) {
-                return null;
-            } else {
-                return responses.json();
+        });
+        if (response !== null) {
+            const parsed_response = await response.json();
+            var temp = {};
+            for (let category of parsed_response) {
+                temp[category.id] = category.name;
             }
-        })
-        .then(parsed_responses => {
-            if (parsed_responses !== null) {
-                var temp = {};
-                for (let category of parsed_responses) {
-                    temp[category.id] = category.name;
+            if (autocomplete_categories.length === 0) {
+                for (let category of parsed_response) {
+                    autocomplete_categories.push({title: category.name});
                 }
-                if (autocomplete_categories.length === 0) {
-                    for (let category of parsed_responses) {
-                        autocomplete_categories.push({title: category.name});
-                    }
-                }
-                this.setState({
-                    categories: temp
-                })
-                this.setState({
-                    category: this.state.categories[this.state.category_id]
-                })
             }
-        })
+            this.setState({
+                categories: temp
+            })
+            this.setState({
+                category: this.state.categories[this.state.category_id]
+            })
+        }
+        // .then(responses => {
+        //     if (responses === null) {
+        //         return null;
+        //     } else {
+        //         return responses.json();
+        //     }
+        // })
+        // .then(parsed_responses => {
+        //     if (parsed_responses !== null) {
+        //         var temp = {};
+        //         for (let category of parsed_responses) {
+        //             temp[category.id] = category.name;
+        //         }
+        //         if (autocomplete_categories.length === 0) {
+        //             for (let category of parsed_responses) {
+        //                 autocomplete_categories.push({title: category.name});
+        //             }
+        //         }
+        //         this.setState({
+        //             categories: temp
+        //         })
+        //         this.setState({
+        //             category: this.state.categories[this.state.category_id]
+        //         })
+        //     }
+        // })
     }
 
     handleClickOpen() {
@@ -176,16 +203,19 @@ class View extends Component {
         })
     }
 
-    handleDelete() {
-        fetch(todo_api_url + "/" + this.state.id, {
+    async handleDelete() {
+        const response = await fetch(todo_api_url + "/" + this.state.id, {
             method: "DELETE",
             mode: 'cors'
-        })
-        .then(response => {
-            this.setState({
-                isDelete: response.ok
-            })
-        })
+        });
+        if (response.ok) {
+            this.props.history.push('/Home')
+        }
+        // .then(response => {
+        //     this.setState({
+        //         isDelete: response.ok
+        //     })
+        // })
     }
 
 
