@@ -21,15 +21,16 @@ class App extends Component {
             Categories: {},
             todo_data: false,
             category_data: false,
-            value: ''
+            //This value is the filter value
+            value: 'All'
         }
         this.handleCategoryChange = this.handleCategoryChange.bind(this);
         this.handleFilter = this.handleFilter.bind(this);
     }
 
     componentDidMount() {
-        this.setCategories();
-        this.setTodos();  
+            this.setCategories();
+            this.setTodos(); 
     }
 
     //Wait till todos are fetched and parsed. Handles null case
@@ -86,7 +87,7 @@ class App extends Component {
         const response = await fetch(api_url);
         if (response !== null) {
             const parsed_response = await response.json();
-            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: parsed_response, Categories: this.state.Categories}});
+            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: parsed_response, Categories: this.state.Categories, filter: this.state.value}});
         }
         
     }
@@ -94,7 +95,7 @@ class App extends Component {
     render() {
         console.log(this.state.Todos);
         console.log(this.state.Categories);
-        console.log(window.location.hash);
+        console.log("EEYOOOOOOO");
         return (
             <div>
 

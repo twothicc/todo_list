@@ -30,6 +30,7 @@ class View extends Component {
             category: '',
             categories: {},
             open: false,
+            filter: ''
         }
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -57,7 +58,8 @@ class View extends Component {
                 body: this.props.location.aboutProps.body,
                 category_id: this.props.location.aboutProps.category_id,
                 category: this.props.location.aboutProps.category,
-                categories: this.props.location.aboutProps.categories
+                categories: this.props.location.aboutProps.categories,
+                filter: this.props.location.aboutProps.filter
             });
             if (autocomplete_categories.length === 0) {
                 autocomplete_categories = this.props.location.aboutProps.autocomplete_categories;

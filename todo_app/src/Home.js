@@ -64,7 +64,7 @@ class Home extends Component {
         } else {
             this.setState({
                 Todos: this.props.location.aboutProps.Todos,
-                Categories: this.props.location.aboutProps.Categories,
+                Categories: this.props.location.aboutProps.Categories
             })
             //Need to remove the All title from autocomplete_categories object since 'All' isn't an actual record in Categories table
             if (autocomplete_categories.length === 0 && this.props.location.aboutProps.autocomplete_categories !== undefined) {
