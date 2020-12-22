@@ -26,11 +26,14 @@ class View extends Component {
             id: '',
             name: '',
             body: '',
+            form_name: '',
+            form_body: '',
             category_id: '',
             category: '',
             categories: {},
             open: false,
-            filter: ''
+            error: false,
+            error_msg: ''
         }
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -39,6 +42,7 @@ class View extends Component {
         this.handleFormTitleChange = this.handleFormTitleChange.bind(this);
         this.handleFormContentChange = this.handleFormContentChange.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
+        this.handleError = this.handleError.bind(this);
     }
 
     componentDidMount() {
@@ -56,6 +60,8 @@ class View extends Component {
                 id: this.props.location.aboutProps.id,
                 name: this.props.location.aboutProps.name,
                 body: this.props.location.aboutProps.body,
+                form_name: this.props.location.aboutProps.name,
+                form_body: this.props.location.aboutProps.body,
                 category_id: this.props.location.aboutProps.category_id,
                 category: this.props.location.aboutProps.category,
                 categories: this.props.location.aboutProps.categories,
@@ -157,7 +163,16 @@ class View extends Component {
             body: data
         });
         const parsed_response = await response.json();
-        this.updateState(parsed_response);
+        if (response.ok) {
+            this.updateState(parsed_response);
+        } else {
+            const msg = parsed_response.name[0];
+            this.handleError('Todo name ' + msg);
+            this.setState({
+                form_name: this.state.name,
+                form_body: this.state.body
+            })
+        }
         this.handleClose();
         console.log("updated");
     }
@@ -165,14 +180,14 @@ class View extends Component {
     //Changes name dynamically as user inputs in Textfield
     handleFormTitleChange(event) {
         this.setState({
-            name: event.target.value
+            form_name: event.target.value
         })
     }
 
     //Same as above
     handleFormContentChange(event) {
         this.setState({
-            body: event.target.value
+            form_body: event.target.value
         })
     }
 
@@ -187,6 +202,19 @@ class View extends Component {
         }
     }
 
+    handleError(msg) {
+        this.setState({
+            error: true,
+            error_msg: msg
+        });
+        setTimeout(() => {
+            this.setState({
+                error: false,
+                msg: ''
+            })
+        }, 1000);
+    }
+
 
 
     render() {
@@ -199,6 +227,9 @@ class View extends Component {
         }
         return (
             <div className='viewcard_container'>
+                {this.state.error ? 
+                    <h3 style={{color: 'red', zIndex: '2', position: 'fixed', left: '40%', width: '20%', textAlign: 'center', top: '40%'}}>{this.state.error_msg}</h3>
+                    : <br/>}
 
                 <Card className='view_container'>
 
@@ -244,7 +275,7 @@ class View extends Component {
                                         id="name_input"
                                         label="Title"
                                         type="text"
-                                        value={this.state.name}
+                                        value={this.state.form_name}
                                         onChange={this.handleFormTitleChange}
                                         name='todo[name]'
                                         multiline
@@ -256,7 +287,7 @@ class View extends Component {
                                         margin='dense'
                                         label='Content'
                                         type='text'
-                                        value={this.state.body}
+                                        value={this.state.form_body}
                                         onChange={this.handleFormContentChange}
                                         name='todo[body]'
                                         multiline

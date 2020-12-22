@@ -28,7 +28,9 @@ class Home extends Component {
             Categories: {},
             open: false,
             formName: '',
-            formBody: ''
+            formBody: '',
+            error: false,
+            error_msg: ''
         }
         this.setTodos = this.setTodos.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
@@ -40,6 +42,7 @@ class Home extends Component {
         this.handleSubmitCategory = this.handleSubmitCategory.bind(this);
         this.handleCategoryCreate = this.handleCategoryCreate.bind(this);
         this.handleCategoryDelete = this.handleCategoryDelete.bind(this);
+        this.handleError = this.handleError.bind(this);
     }
 
     componentDidMount() {
@@ -175,8 +178,13 @@ class Home extends Component {
             mode: 'cors',
             body: data
         })
+        const parsed_response = await response.json();
+        console.log(parsed_response);
         if (response.ok) {
             window.location.replace('/');
+        } else {
+            const msg = parsed_response.name[0];
+            this.handleError('Category name ' + msg);
         }
     }
 
@@ -202,9 +210,28 @@ class Home extends Component {
             body: data
         });
         const parsed_response = await response.json();
-        this.addToTodos(parsed_response);
+        console.log(parsed_response);
+        if (response.ok) {
+            this.addToTodos(parsed_response);
+        } else {
+            const msg = parsed_response.name[0];
+            this.handleError('Todo name ' + msg);
+        }
         this.handleClose();
         console.log("added new Todo"+this.state.Todos);
+    }
+
+    handleError(msg) {
+        this.setState({
+            error: true,
+            error_msg: msg
+        });
+        setTimeout(() => {
+            this.setState({
+                error: false,
+                msg: ''
+            })
+        }, 1000);
     }
 
     render() {
@@ -212,9 +239,11 @@ class Home extends Component {
         // console.log(this.state.Categories);
         return (
             <div style ={{width: '100%'}}>
-
+                {this.state.error ? 
+                    <h3 style={{color: 'red', zIndex: '2', position: 'fixed', left: '40%', width: '20%', textAlign: 'center', top: '40%'}}>{this.state.error_msg}</h3>
+                    : <br/>}
                 <Button
-                    style ={{zIndex: "1", position: 'fixed',width:'45%', left: '27.5%', backgroundColor: 'white'}} 
+                    style ={{zIndex: "1", position: 'fixed',width:'45%', left: '27.5%', top: '15%', backgroundColor: 'white'}} 
                     size='large' 
                     variant="outlined" 
                     color="primary" 
