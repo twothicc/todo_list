@@ -1,19 +1,20 @@
 class Api::V1::CategoriesController < ApplicationController
+  before_action :set_default, only: [:index]
   before_action :set_category, only: [:show, :update, :destroy]
 
-  # GET /categories
+  # GET /categories/:user
   def index
-    @categories = Category.all
+    @categories = @category
 
     render json: @categories
   end
 
-  # GET /categories/1
+  # GET /categories/:user/1
   def show
     render json: @category
   end
 
-  # POST /categories
+  # POST /categories/:user
   def create
     @category = Category.new(category_params)
 
@@ -24,7 +25,7 @@ class Api::V1::CategoriesController < ApplicationController
     end
   end
 
-  # PATCH/PUT /categories/1
+  # PATCH/PUT /categories/:user/1
   def update
     if @category.update(category_params)
       render json: @category
@@ -33,7 +34,7 @@ class Api::V1::CategoriesController < ApplicationController
     end
   end
 
-  # DELETE /categories/1
+  # DELETE /categories/:user/1
   def destroy
     @category.destroy
   end
@@ -44,8 +45,12 @@ class Api::V1::CategoriesController < ApplicationController
       @category = Category.find(params[:id])
     end
 
+    def set_default
+      @category = Category.where(['user_id = ?', params[:user]])
+    end
+
     # Only allow a trusted parameter "white list" through.
     def category_params
-      params.require(:category).permit(:name)
+      params.require(:category).permit(:name, :user, :user_id)
     end
 end

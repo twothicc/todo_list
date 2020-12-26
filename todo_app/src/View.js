@@ -33,7 +33,8 @@ class View extends Component {
             categories: {},
             open: false,
             error: false,
-            error_msg: ''
+            error_msg: '',
+            user_id: ''
         }
         this.handleClickOpen = this.handleClickOpen.bind(this);
         this.handleClose = this.handleClose.bind(this);
@@ -43,6 +44,7 @@ class View extends Component {
         this.handleFormContentChange = this.handleFormContentChange.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
         this.handleError = this.handleError.bind(this);
+        this.login = this.login.bind(this);
     }
 
     componentDidMount() {
@@ -50,8 +52,9 @@ class View extends Component {
     }
 
     //Reduces need to fetch data from database but simply using aboutProps in URL if made available
-    setTodo() {
+    async setTodo() {
         if (this.props.location.aboutProps === undefined) {
+            await this.login();
             this.fetchTodo();
             this.fetchCategories();
             console.log('reload');
@@ -65,21 +68,32 @@ class View extends Component {
                 category_id: this.props.location.aboutProps.category_id,
                 category: this.props.location.aboutProps.category,
                 categories: this.props.location.aboutProps.categories,
-                filter: this.props.location.aboutProps.filter
+                user_id: this.props.location.aboutProps.user_id
             });
-            if (autocomplete_categories.length === 0) {
-                autocomplete_categories = this.props.location.aboutProps.autocomplete_categories;
-            }
+
+            autocomplete_categories = this.props.location.aboutProps.autocomplete_categories;
+
             console.log('use props');
         }
         
+    }
+
+    async login() {
+        console.log('attempting login');
+        const response = await fetch('/logged_in');
+        const parsed_response = await response.json();
+        if (parsed_response.logged_in) {
+            this.setState({
+                user_id: parsed_response.user.id
+            })
+        }
     }
 
     //Waits for todo to be fetched and parsed. Handles null case. Need to be using window.location.hash instead since hashrouter is used now
     async fetchTodo() {
         var temp = window.location.hash.split('/');
         var id = temp[temp.length - 1];
-        const response = await fetch(todo_api_url + "/" + id, {
+        const response = await fetch(todo_api_url + "/" + this.state.user_id + '/' + id, {
             method: 'GET'
         });
         if (response !== null) {
@@ -95,7 +109,7 @@ class View extends Component {
 
     //Waits for categories to be fetched and parsed. Handles null case
     async fetchCategories() {
-        const response = await fetch(category_api_url, {
+        const response = await fetch(category_api_url + '/' + this.state.user_id, {
             method: 'GET'
         });
         if (response !== null) {
@@ -157,7 +171,8 @@ class View extends Component {
         const category_input = data.get('todo[category_id]');
         const category_id = Object.keys(this.state.categories).find(key => this.state.categories[key] === category_input);
         data.set('todo[category_id]', category_id);
-        const response = await fetch(todo_api_url + "/" + this.state.id, {
+        data.set('todo[user_id]', this.state.user_id);
+        const response = await fetch(todo_api_url + "/" + this.state.user_id + '/' + this.state.id, {
             method: "PUT",
             mode: 'cors',
             body: data
@@ -193,7 +208,7 @@ class View extends Component {
 
     //wait for current record to be deleted. If deleted, then record is gone, go back to home page
     async handleDelete() {
-        const response = await fetch(todo_api_url + "/" + this.state.id, {
+        const response = await fetch(todo_api_url + "/" + this.state.user_id + '/' + this.state.id, {
             method: "DELETE",
             mode: 'cors'
         });

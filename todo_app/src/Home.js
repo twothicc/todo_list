@@ -30,7 +30,8 @@ class Home extends Component {
             formName: '',
             formBody: '',
             error: false,
-            error_msg: ''
+            error_msg: '',
+            user_id: ''
         }
         this.setTodos = this.setTodos.bind(this);
         this.handleDelete = this.handleDelete.bind(this);
@@ -43,6 +44,7 @@ class Home extends Component {
         this.handleCategoryCreate = this.handleCategoryCreate.bind(this);
         this.handleCategoryDelete = this.handleCategoryDelete.bind(this);
         this.handleError = this.handleError.bind(this);
+        this.login = this.login.bind(this);
     }
 
     componentDidMount() {
@@ -58,28 +60,41 @@ class Home extends Component {
 
     //Allows Home state to use the state variables from App, eliminating need to fetch from database unless user refreshes page
     //Also handles case where user refreshes or simply returns to '/home'
-    setTodos() {
+    async setTodos() {
         //Must first check if aboutProps exists
         if (this.props.location.aboutProps === undefined) {
+            await this.login();
             this.fetchCategories();
             this.fetchTodos();
             console.log('reload');
         } else {
             this.setState({
                 Todos: this.props.location.aboutProps.Todos,
-                Categories: this.props.location.aboutProps.Categories
+                Categories: this.props.location.aboutProps.Categories,
+                user_id: this.props.location.aboutProps.user_id
             })
             //Need to remove the All title from autocomplete_categories object since 'All' isn't an actual record in Categories table
-            if (autocomplete_categories.length === 0 && this.props.location.aboutProps.autocomplete_categories !== undefined) {
+            if (this.props.location.aboutProps.autocomplete_categories !== undefined) {
                 autocomplete_categories = this.props.location.aboutProps.autocomplete_categories.filter(listing => listing['title'] !== 'All')
             }
             console.log("home use props");
         }
     }
 
+    async login() {
+        console.log('attempting login');
+        const response = await fetch('/logged_in');
+        const parsed_response = await response.json();
+        if (parsed_response.logged_in) {
+            this.setState({
+                user_id: parsed_response.user.id
+            })
+        }
+    }
+
     //Waits for todos to be fetched and parsed. Handles null case.
     async fetchTodos() {
-        const response = await fetch(todo_api_url);
+        const response = await fetch(todo_api_url + '/' + this.state.user_id);
         if (response !== null) {
             const parsed_response = await response.json();
             this.setState({
@@ -90,7 +105,7 @@ class Home extends Component {
 
     //Waits for categories to be fetched and parsed. Handles null case
     async fetchCategories() {
-        const response = await fetch(category_api_url);
+        const response = await fetch(category_api_url + '/' + this.state.user_id);
         
         if (response !== null) {
             const parsed_response = await response.json();
@@ -98,6 +113,7 @@ class Home extends Component {
             for (let category of parsed_response) {
                 temp[category.id] = category.name;
             }
+
             //If autocomplete options isn't empty, then this would just create duplicated fixed options. Hence need to check length
             if (autocomplete_categories.length === 0) {
                 for (let category of parsed_response) {
@@ -115,7 +131,7 @@ class Home extends Component {
     handleDelete(event) {
         console.log(event.currentTarget.id);
         const id = event.currentTarget.id;
-        fetch(todo_api_url + "/" + id, {
+        fetch(todo_api_url + "/" + this.state.user_id + '/' + id, {
             method: "DELETE"
         })
         .then(() => this.removeFromTodos(id));
@@ -173,13 +189,13 @@ class Home extends Component {
     //Even tried to reset the todo_data and category_data in App.js but no werk.
     async handleCategoryCreate(formData) {
         var data = new FormData(formData);
-        const response = await fetch(category_api_url, {
+        data.set('category[user_id]', this.state.user_id);
+        const response = await fetch(category_api_url + '/' + this.state.user_id, {
             method: "POST",
             mode: 'cors',
             body: data
         })
         const parsed_response = await response.json();
-        console.log(parsed_response);
         if (response.ok) {
             window.location.replace('/');
         } else {
@@ -190,7 +206,7 @@ class Home extends Component {
 
     //Same as above
     async handleCategoryDelete(event) {
-        const response =  await fetch(category_api_url + "/" + event.currentTarget.id, {
+        const response =  await fetch(category_api_url + "/" + this.state.user_id + "/" + event.currentTarget.id, {
             method: 'DELETE'
         })
         if (response.ok) {
@@ -203,14 +219,14 @@ class Home extends Component {
         var data = new FormData(formData);
         const category_input = data.get('todo[category_id]');
         const category_id = Object.keys(this.state.Categories).find(key => this.state.Categories[key] === category_input);
+        data.set('todo[user_id]', this.state.user_id);
         data.set('todo[category_id]', category_id);
-        const response = await fetch(todo_api_url, {
+        const response = await fetch(todo_api_url + '/' + this.state.user_id, {
             method: "POST",
             mode: 'cors',
             body: data
         });
         const parsed_response = await response.json();
-        console.log(parsed_response);
         if (response.ok) {
             this.addToTodos(parsed_response);
         } else {
@@ -345,7 +361,8 @@ class Home extends Component {
                                             category_id: todo.category_id, 
                                             category: this.state.Categories[todo.category_id],
                                             categories: this.state.Categories,
-                                            autocomplete_categories: autocomplete_categories}}}>
+                                            autocomplete_categories: autocomplete_categories,
+                                            user_id: this.state.user_id}}}>
 
                                         <Button size="small">Expand</Button>
 

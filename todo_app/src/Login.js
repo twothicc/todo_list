@@ -35,7 +35,7 @@ class Login extends Component {
         const parsed_response = await response.json();
         if (parsed_response.logged_in) {
             //Need to make App.js take this shit
-            console.log('login successful' + parsed_response.user.username);
+            console.log('login successful ' + parsed_response.user.username);
             this.props.history.push({pathname: '/', aboutProps: {outcome: parsed_response}});
         } else {
             this.setState({

@@ -33,7 +33,7 @@ class Signup extends Component {
         });
         const parsed_response = await response.json();
         if (parsed_response.status === 'created') {
-            //Need to get App.js to handle this shit
+            console.log('signup successful ' + parsed_response.user.username)
             this.props.history.push({pathname: '/', aboutProps: {outcome: parsed_response}})
         } else {
             this.setState({

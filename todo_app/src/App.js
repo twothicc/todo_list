@@ -7,7 +7,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Link, Redirect, withRouter } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 
-const autocomplete_categories = [];
+var autocomplete_categories = [];
 
 const todo_api_url = '/api/v1/todos';
 
@@ -24,7 +24,8 @@ class App extends Component {
             category_data: false,
             //This value is the filter value
             value: 'All',
-            user: 'Guest'
+            user: 'Guest',
+            user_id: ''
         }
         this.handleCategoryChange = this.handleCategoryChange.bind(this);
         this.handleFilter = this.handleFilter.bind(this);
@@ -43,6 +44,7 @@ class App extends Component {
             }
         } else {
             console.log('LOGIN')
+            //Need to have a check here cuz otherwise setCategories complains about non-iterables being returned
             await this.login();
             if (this.state.is_logged_in) {
                 this.setCategories();
@@ -62,11 +64,16 @@ class App extends Component {
                 }
             }
         }
+
+        if (prevState.user !== this.state.user && this.state.user !== 'Guest') {
+            this.setCategories();
+            this.setTodos();
+        }
     }
 
     //Wait till todos are fetched and parsed. Handles null case
     async setTodos() {
-        const response = await fetch(todo_api_url);
+        const response = await fetch(todo_api_url + '/' + this.state.user_id);
         if (response !== null) {
             const parsed_response = await response.json();
             this.setState({
@@ -79,10 +86,9 @@ class App extends Component {
 
     //Wait till categories are fetched and parsed. Handles null case
     async setCategories() {
-        const response = await fetch(categorty_api_url);
+        const response = await fetch(categorty_api_url + '/' + this.state.user_id);
         if (response !== null) {
             const parsed_response = await response.json();
-            console.log('parsed' + parsed_response);
             var temp = {};
             for (let category of parsed_response) {
                 temp[category.id] = category.name;
@@ -111,9 +117,9 @@ class App extends Component {
     async handleFilter() {
         var api_url = '';
         if (this.state.value === "All") {
-            api_url = todo_api_url
+            api_url = todo_api_url + '/' + this.state.user_id
         } else {
-            api_url = todo_api_url + '/search/' + Object.keys(this.state.Categories).find(key => this.state.Categories[key] === this.state.value);
+            api_url = todo_api_url + '/' + this.state.user_id + '/search/' + Object.keys(this.state.Categories).find(key => this.state.Categories[key] === this.state.value);
         }
         console.log("filter url" + api_url)
         const response = await fetch(api_url);
@@ -127,14 +133,23 @@ class App extends Component {
     handleLogin(data) {
         this.setState({
             is_logged_in: true,
-            user: data.user.username
+            user: data.user.username,
+            user_id: data.user.id
         })
     }
 
+    //Pretty much need a clean slate on logout
     handleLogout() {
+        autocomplete_categories = [];
         this.setState({
             is_logged_in: false,
-            user: 'Guest'
+            user: 'Guest',
+            user_id: '',
+            Todos: [],
+            Categories: {},
+            todo_data: false,
+            category_data: false,
+            value: 'All'
         })
     }
 
@@ -165,9 +180,8 @@ class App extends Component {
 
 
     render() {
-        console.log(this.state.Todos);
-        console.log(this.state.Categories);
-        console.log('is logged in ' + this.state.is_logged_in);
+        //console.log(this.state.Todos);
+        //console.log(this.state.Categories);
         
         return this.state.is_logged_in 
         ? (
@@ -194,6 +208,8 @@ class App extends Component {
                                 </nav>
 
                                 <h4>{this.state.user}</h4>
+
+                                <h4>{this.state.user_id}</h4>
 
                                 <Button variant = 'outlined' style = {{backgroundColor: 'white', marginInline: '1%'}} onClick={this.logout}>Logout</Button>
 
@@ -234,7 +250,13 @@ class App extends Component {
 
                 {(this.state.todo_data === true && this.state.category_data === true)
                     ? window.location.hash === '#/'
-                        ? <Redirect to ={{pathname: '/Home', aboutProps: {Todos: this.state.Todos, Categories: this.state.Categories, autocomplete_categories: autocomplete_categories}}}/>
+                        ? <Redirect to ={{pathname: '/Home', 
+                            aboutProps: {
+                                Todos: this.state.Todos, 
+                                Categories: this.state.Categories, 
+                                autocomplete_categories: autocomplete_categories,
+                                user_id: this.state.user_id
+                            }}}/>
                         : <br/>
                     : <br/>}
 

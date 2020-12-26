@@ -1,19 +1,20 @@
 class Api::V1::TodosController < ApplicationController
+  before_action :set_default, only: [:index]
   before_action :set_todo, only: [:show, :update, :destroy]
 
-  # GET /todos
+  # GET /todos/:user
   def index
-    @todos = Todo.all.order("created_at DESC")
-
+    # @todos = Todo.all.order("created_at DESC")
+    @todos = @todo.order('created_at DESC')
     render json: @todos
   end
 
-  # GET /todos/1
+  # GET /todos/:user/1
   def show
     render json: @todo
   end
 
-  # POST /todos
+  # POST /todos/:user
   def create
     @todo = Todo.new(todo_params)
 
@@ -24,7 +25,7 @@ class Api::V1::TodosController < ApplicationController
     end
   end
 
-  # PATCH/PUT /todos/1
+  # PATCH/PUT /todos/:user/1
   def update
     if @todo.update(todo_params)
       render json: @todo
@@ -33,14 +34,15 @@ class Api::V1::TodosController < ApplicationController
     end
   end
 
-  # DELETE /todos/1
+  # DELETE /todos/:user/1
   def destroy
     @todo.destroy
   end
 
-  # Search /todos/search/:category_id
+  # Search /todos/:user/search/:category_id
   def search
-    @todo = Todo.where(category_id: params[:category_id])
+    # @todo = Todo.where(category_id: params[:category_id])
+    @todo = Todo.where(['user_id = ? AND category_id = ?', params[:user], params[:category_id]]).order('created_at DESC')
 
     render json: @todo
   end
@@ -51,8 +53,12 @@ class Api::V1::TodosController < ApplicationController
       @todo = Todo.find(params[:id])
     end
 
+    def set_default
+      @todo = Todo.where(['user_id = ?', params[:user]])
+    end
+
     # Only allow a trusted parameter "white list" through.
     def todo_params
-      params.require(:todo).permit(:name, :body, :category_id)
+      params.require(:todo).permit(:name, :body, :user, :category_id, :user_id)
     end
 end
