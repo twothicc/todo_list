@@ -17,20 +17,51 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            is_logged_in: false,
             Todos: [],
             Categories: {},
             todo_data: false,
             category_data: false,
             //This value is the filter value
-            value: 'All'
+            value: 'All',
+            user: 'Guest'
         }
         this.handleCategoryChange = this.handleCategoryChange.bind(this);
         this.handleFilter = this.handleFilter.bind(this);
+        this.handleLogin = this.handleLogin.bind(this);
+        this.handleLogout = this.handleLogout.bind(this);
+        this.logout = this.logout.bind(this);
+        this.login = this.login.bind(this);
     }
 
-    componentDidMount() {
-            this.setCategories();
-            this.setTodos(); 
+    async componentDidMount() {
+        //If coming back from login or signup page, it means login/signup is successful. So just login
+        if (this.props.location.aboutProps !== undefined) {
+            console.log('USE PROPS')
+            if (this.props.location.aboutProps.outcome !== undefined) {
+                this.handleLogin(this.props.location.aboutProps.outcome)
+            }
+        } else {
+            console.log('LOGIN')
+            await this.login();
+            if (this.state.is_logged_in) {
+                this.setCategories();
+                this.setTodos(); 
+            } else {
+
+            }
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.location.aboutProps !== this.props.location.aboutProps) {
+            if (this.props.location.aboutProps !== undefined) {
+                console.log('USE PROPS')
+                if (this.props.location.aboutProps.outcome !== undefined) {
+                    this.handleLogin(this.props.location.aboutProps.outcome)
+                }
+            }
+        }
     }
 
     //Wait till todos are fetched and parsed. Handles null case
@@ -51,6 +82,7 @@ class App extends Component {
         const response = await fetch(categorty_api_url);
         if (response !== null) {
             const parsed_response = await response.json();
+            console.log('parsed' + parsed_response);
             var temp = {};
             for (let category of parsed_response) {
                 temp[category.id] = category.name;
@@ -92,11 +124,53 @@ class App extends Component {
         
     }
 
+    handleLogin(data) {
+        this.setState({
+            is_logged_in: true,
+            user: data.user.username
+        })
+    }
+
+    handleLogout() {
+        this.setState({
+            is_logged_in: false,
+            user: 'Guest'
+        })
+    }
+
+    async login() {
+        console.log('attempting login');
+        const response = await fetch('/logged_in');
+        const parsed_response = await response.json();
+        if (parsed_response.logged_in) {
+            this.handleLogin(parsed_response);
+        } else {
+            this.handleLogout();
+        }
+    }
+
+    async logout() {
+        const response = await fetch('/logout', {
+            method: 'POST'
+        });
+        const parsed_response = await response.json();
+        if (parsed_response.logged_out) {
+            this.handleLogout();
+            this.props.history.replace('/');
+        } else {
+            //Shld display error logout failed.
+        }
+    }
+
+
+
     render() {
         console.log(this.state.Todos);
         console.log(this.state.Categories);
-        console.log("EEYOOOOOOO");
-        return (
+        console.log('is logged in ' + this.state.is_logged_in);
+        
+        return this.state.is_logged_in 
+        ? (
             <div>
 
                 <AppBar className = 'appbar'>
@@ -105,7 +179,7 @@ class App extends Component {
 
                         <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'space-between', width:'100%'}}>
 
-                            <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'space-between', width:'15%'}}>
+                            <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'space-between', width:'30%'}}>
 
                                 <h1>TodoList</h1>
 
@@ -119,9 +193,13 @@ class App extends Component {
 
                                 </nav>
 
+                                <h4>{this.state.user}</h4>
+
+                                <Button variant = 'outlined' style = {{backgroundColor: 'white', marginInline: '1%'}} onClick={this.logout}>Logout</Button>
+
                             </div>
 
-                            <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'flex-end', width:'85%'}}>
+                            <div style = {{display: "flex", flexDirection: "row", alignItems: 'center', justifyContent: 'flex-end', width:'70%'}}>
 
                                 <Autocomplete
                                     id="search_todo"
@@ -160,6 +238,17 @@ class App extends Component {
                         : <br/>
                     : <br/>}
 
+            </div>
+        )
+        : (
+            <div>
+                <nav>
+                    <h3>{`Current User: ${this.state.user}`}</h3>
+                    <ul>
+                        <Link to = {{pathname: '/login'}}><h3>Login</h3></Link>
+                        <Link to = {{pathname: '/Signup'}}><h3>Signup</h3></Link>
+                    </ul>
+                </nav>
             </div>
         )
     }
