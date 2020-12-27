@@ -392,14 +392,14 @@ class Home extends Component {
 
                                 <CardActions>
 
-                                    {(key === '1') ? <br/> :
-                                        <Button 
-                                            id={key} 
-                                            style={{width: '100%'}} 
-                                            size = 'small' 
-                                            onClick={this.handleCategoryDelete} 
-                                            startIcon = {<DeleteIcon/>}
-                                        />}
+                                    
+                                    <Button
+                                        id={key} 
+                                        style={{width: '100%'}} 
+                                        size = 'small' 
+                                        onClick={this.handleCategoryDelete} 
+                                        startIcon = {<DeleteIcon/>}
+                                    />
 
                                 </CardActions>
 

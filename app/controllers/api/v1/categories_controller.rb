@@ -17,12 +17,18 @@ class Api::V1::CategoriesController < ApplicationController
   # POST /categories/:user
   def create
     @category = Category.new(category_params)
-
-    if @category.save
-      render json: @category, status: :created, location: api_v1_categories_path(@category)
+    
+    if Category.where(user_id: @category.user_id, name: @category.name).count == 0
+      if @category.save
+        render json: @category, status: :created, location: api_v1_categories_path(@category)
+      else
+        render json: @category.errors, status: :unprocessable_entity
+      end
     else
-      render json: @category.errors, status: :unprocessable_entity
+      #I have to put this in an array to match the way I handled error messages for other errors
+      render json: {name: ['already exists']}, status: :unprocessable_entity
     end
+
   end
 
   # PATCH/PUT /categories/:user/1
@@ -36,7 +42,34 @@ class Api::V1::CategoriesController < ApplicationController
 
   # DELETE /categories/:user/1
   def destroy
-    @category.destroy
+    #find user_id of category being deleted so we can make sure a user always has a 'Default' category
+    curr_user_id = @category.user_id
+    
+
+    #Need to also find category_id of a category of the user that is called 'Default' 
+    default_category = Category.find_by name: 'Default', user_id: curr_user_id
+    default_category_id = default_category.id
+
+    #find all todos with category_id of category being deleted
+    todos_associated_to_category = Todo.where(['category_id = ?', @category.id])
+
+    if @category.name == 'Default'
+      temp = Category.new(name: 'Default', user_id: curr_user_id)
+      if temp.save
+        render json: temp, status: :created, location: api_v1_categories_path(temp), msg: 'Must Have Default'
+      else
+        render json: temp.errors, status: :unprocessable_entity, msg: 'Default creation failed'
+      end
+      #Since Default could be destroyed here, we simply take the id of temp category which is the new 'Default'
+      todos_associated_to_category.update_all category_id: temp.id
+      @category.destroy
+    else
+      
+      #best part is update_all does not edit the timestamp fields
+      todos_associated_to_category.update_all category_id: default_category_id
+      @category.destroy
+    end
+    
   end
 
   private
