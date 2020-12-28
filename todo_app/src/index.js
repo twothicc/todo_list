@@ -6,12 +6,16 @@ import reportWebVitals from './reportWebVitals';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import View from './View';
 import Home from './Home';
+import Login from './Login';
+import Signup from './Signup';
 
 ReactDOM.render(
   <HashRouter>
     <Switch>
         <Route exact path = "/Home" component = {Home}/>
         <Route exact path = "/Home/:id" component = {View}/>
+        <Route exact path = "/Login" component = {Login}/>
+        <Route exact path = "/Signup" component = {Signup}/>
     </Switch>
     <React.StrictMode>
       <App />
