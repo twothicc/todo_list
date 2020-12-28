@@ -103,11 +103,10 @@ class Login extends Component {
                             id='password_input'
                             margin='dense'
                             label='password'
-                            type='text'
+                            type='password'
                             name='user[password]'
                             value={this.state.password}
                             onChange={this.handlePasswordChange}
-                            multiline
                             fullWidth
                         />
 
@@ -115,11 +114,10 @@ class Login extends Component {
                             id='password_confirmation_input'
                             margin='dense'
                             label='password_confirmation'
-                            type='text'
+                            type='password'
                             name='user[password_confirmation]'
                             value={this.state.password_confirmation}
                             onChange={this.handlePasswordConfirmationChange}
-                            multiline
                             fullWidth
                         />
                         <Button 
