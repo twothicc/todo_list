@@ -38,7 +38,7 @@ class App extends Component {
     async componentDidMount() {
         //If coming back from login or signup page, it means login/signup is successful. So just login
         if (this.props.location.aboutProps !== undefined) {
-            console.log('USE PROPS')
+            console.log('Mount USE PROPS')
             if (this.props.location.aboutProps.outcome !== undefined) {
                 this.handleLogin(this.props.location.aboutProps.outcome)
             }
@@ -179,6 +179,7 @@ class App extends Component {
 
 
 
+
     render() {
         //console.log(this.state.Todos);
         //console.log(this.state.Categories);
@@ -208,8 +209,6 @@ class App extends Component {
                                 </nav>
 
                                 <h4>{this.state.user}</h4>
-
-                                <h4>{this.state.user_id}</h4>
 
                                 <Button variant = 'outlined' style = {{backgroundColor: 'white', marginInline: '1%'}} onClick={this.logout}>Logout</Button>
 
@@ -263,15 +262,17 @@ class App extends Component {
             </div>
         )
         : (
-            <div>
-                <nav>
-                    <h3>{`Current User: ${this.state.user}`}</h3>
-                    <ul>
-                        <Link to = {{pathname: '/login'}}><h3>Login</h3></Link>
-                        <Link to = {{pathname: '/Signup'}}><h3>Signup</h3></Link>
-                    </ul>
-                </nav>
-            </div>
+            
+            <div style={{position: 'fixed', display: "flex", flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', 
+                backgroundColor: "steelblue", width: '100%', height: '7%', top: '0%'}}>
+
+                    <h2 style={{color: 'lightcyan', marginLeft: '1%'}}>TodoList</h2>
+                    <div style={{borderLeft: '2px solid white', height: '100%', marginLeft: '1%'}}></div>
+                    <Link to = {{pathname: '/Login'}} style={{color: 'white', marginLeft: '1%'}}><h3>Login</h3></Link>
+                    <Link to = {{pathname: '/Signup'}} style={{color: 'white', marginLeft: '1%'}}><h3>Signup</h3></Link>
+                    
+            </div>                
+                
         )
     }
 

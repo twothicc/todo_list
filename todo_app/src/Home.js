@@ -259,7 +259,7 @@ class Home extends Component {
                     <h3 style={{color: 'red', zIndex: '2', position: 'fixed', left: '40%', width: '20%', textAlign: 'center', top: '40%'}}>{this.state.error_msg}</h3>
                     : <br/>}
                 <Button
-                    style ={{zIndex: "1", position: 'fixed',width:'45%', left: '27.5%', top: '15%', backgroundColor: 'white'}} 
+                    style ={{zIndex: "1", position: 'fixed',width:'45%', left: '27.5%', top: '10%', backgroundColor: 'white'}} 
                     size='large' 
                     variant="outlined" 
                     color="primary" 
