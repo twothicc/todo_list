@@ -387,7 +387,7 @@ class Home extends Component {
                         {Object.keys(this.state.Categories).map(key => this.state.Categories[key] === 'Default'
                             ? <Card key = {key} style={{width: '60%', height: 'auto', marginInline: 'auto', marginTop: '1%', textAlign: 'center'}}>
                                 <CardContent> <h4>{this.state.Categories[key]}</h4></CardContent>
-                            </Card>: <br key = {key}/>)}
+                            </Card>: <div key = {key}/>)}
 
                         {Object.keys(this.state.Categories).map(key => this.state.Categories[key] !== 'Default' ? (
                             <Card key = {key} style={{width: '60%', height: 'auto', marginInline: 'auto', marginTop: '1%', textAlign: 'center'}}>

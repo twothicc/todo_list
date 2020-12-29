@@ -266,9 +266,9 @@ class App extends Component {
         : (
             
             <div style={{position: 'fixed', display: "flex", flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', 
-                backgroundColor: "steelblue", width: '100%', height: '7%', top: '0%'}}>
+                backgroundColor: "#3f51b5", width: '100%', height: '12%', top: '0%'}}>
 
-                    <h2 style={{color: 'lightcyan', marginLeft: '1%'}}>TodoList</h2>
+                    <h2 style={{color: 'white', marginLeft: '1%'}}>TodoList</h2>
                     <div style={{borderLeft: '2px solid white', height: '100%', marginLeft: '1%'}}></div>
                     <Link to = {{pathname: '/Login'}} style={{color: 'white', marginLeft: '1%'}}><h3>Login</h3></Link>
                     <Link to = {{pathname: '/Signup'}} style={{color: 'white', marginLeft: '1%'}}><h3>Signup</h3></Link>

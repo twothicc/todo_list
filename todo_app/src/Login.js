@@ -9,7 +9,6 @@ class Login extends Component {
         this.state = {
             username: '',
             password: '',
-            password_confirmation: '',
             error: false,
             error_msg: ''
         }
@@ -18,7 +17,6 @@ class Login extends Component {
         this.submitLoginRequest = this.submitLoginRequest.bind(this);
         this.handleUsernameChange = this.handleUsernameChange.bind(this);
         this.handlePasswordChange = this.handlePasswordChange.bind(this);
-        this.handlePasswordConfirmationChange = this.handlePasswordConfirmationChange.bind(this);
         this.handleError = this.handleError.bind(this);
     }
 
@@ -56,11 +54,7 @@ class Login extends Component {
         })
     }
 
-    handlePasswordConfirmationChange(event) {
-        this.setState({
-            password_confirmation: event.target.value
-        })
-    }
+    
 
     handleError(msg) {
         this.setState({
@@ -110,16 +104,7 @@ class Login extends Component {
                             fullWidth
                         />
 
-                        <TextField
-                            id='password_confirmation_input'
-                            margin='dense'
-                            label='password_confirmation'
-                            type='password'
-                            name='user[password_confirmation]'
-                            value={this.state.password_confirmation}
-                            onChange={this.handlePasswordConfirmationChange}
-                            fullWidth
-                        />
+                        
                         <Button 
                             variant="outlined" 
                             color="primary"
