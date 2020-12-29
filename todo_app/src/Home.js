@@ -116,8 +116,11 @@ class Home extends Component {
 
             //If autocomplete options isn't empty, then this would just create duplicated fixed options. Hence need to check length
             if (autocomplete_categories.length === 0) {
+                autocomplete_categories.push({title: 'Default'});
                 for (let category of parsed_response) {
-                    autocomplete_categories.push({title: category.name});
+                    if (category.name !== 'Default') {
+                        autocomplete_categories.push({title: category.name});
+                    }
                 }
             }
             this.setState({
@@ -381,7 +384,12 @@ class Home extends Component {
 
                         <h3 style={{textAlign: 'center', width: '60%', marginInline: 'auto',  textDecoration: 'underline'}}>Categories</h3>
 
-                        {Object.keys(this.state.Categories).map(key => (
+                        {Object.keys(this.state.Categories).map(key => this.state.Categories[key] === 'Default'
+                            ? <Card key = {key} style={{width: '60%', height: 'auto', marginInline: 'auto', marginTop: '1%', textAlign: 'center'}}>
+                                <CardContent> <h4>{this.state.Categories[key]}</h4></CardContent>
+                            </Card>: <br key = {key}/>)}
+
+                        {Object.keys(this.state.Categories).map(key => this.state.Categories[key] !== 'Default' ? (
                             <Card key = {key} style={{width: '60%', height: 'auto', marginInline: 'auto', marginTop: '1%', textAlign: 'center'}}>
 
                                 <CardContent>
@@ -404,7 +412,7 @@ class Home extends Component {
                                 </CardActions>
 
                             </Card>
-                        ))}
+                        ): <br key = {key}/>)}
                         <form
                             onSubmit={this.handleSubmitCategory}
                             id='category_form'

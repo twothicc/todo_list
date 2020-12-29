@@ -36,39 +36,38 @@ class App extends Component {
     }
 
     async componentDidMount() {
-        //If coming back from login or signup page, it means login/signup is successful. So just login
-        if (this.props.location.aboutProps !== undefined) {
-            console.log('Mount USE PROPS')
-            if (this.props.location.aboutProps.outcome !== undefined) {
-                this.handleLogin(this.props.location.aboutProps.outcome)
-            }
+        
+        console.log('LOGIN')
+        //Need to have a check here cuz otherwise setCategories complains about non-iterables being returned
+        await this.login();
+        if (this.state.is_logged_in) {
+            this.setCategories();
+            this.setTodos(); 
         } else {
-            console.log('LOGIN')
-            //Need to have a check here cuz otherwise setCategories complains about non-iterables being returned
-            await this.login();
-            if (this.state.is_logged_in) {
-                this.setCategories();
-                this.setTodos(); 
-            } else {
 
-            }
         }
+        console.log('reload')
+        
     }
 
+
     componentDidUpdate(prevProps, prevState) {
+        //If coming back from login or signup page, it means login/signup is successful. So just login
         if (prevProps.location.aboutProps !== this.props.location.aboutProps) {
             if (this.props.location.aboutProps !== undefined) {
-                console.log('USE PROPS')
                 if (this.props.location.aboutProps.outcome !== undefined) {
+                    console.log('actually handling login')
                     this.handleLogin(this.props.location.aboutProps.outcome)
                 }
             }
-        }
+        }  
+        
 
         if (prevState.user !== this.state.user && this.state.user !== 'Guest') {
             this.setCategories();
             this.setTodos();
         }
+
     }
 
     //Wait till todos are fetched and parsed. Handles null case
@@ -95,8 +94,11 @@ class App extends Component {
             }
             if (autocomplete_categories.length === 0) {
                 autocomplete_categories.push({ title: 'All' });
+                autocomplete_categories.push({title: 'Default'});
                 for (let category of parsed_response) {
-                    autocomplete_categories.push({ title: category.name });
+                    if (category.name !== 'Default') {
+                        autocomplete_categories.push({ title: category.name });
+                    }
                 }
             }
             this.setState({
@@ -125,7 +127,7 @@ class App extends Component {
         const response = await fetch(api_url);
         if (response !== null) {
             const parsed_response = await response.json();
-            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: parsed_response, Categories: this.state.Categories, filter: this.state.value}});
+            this.props.history.replace({pathname: '/Home', aboutProps: {Todos: parsed_response, Categories: this.state.Categories, user_id: this.state.user_id}});
         }
         
     }
