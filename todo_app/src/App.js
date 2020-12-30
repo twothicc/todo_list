@@ -250,7 +250,7 @@ class App extends Component {
                 </AppBar>
 
                 {(this.state.todo_data === true && this.state.category_data === true)
-                    ? window.location.hash === '#/'
+                    ? window.location.pathname === '/'
                         ? <Redirect to ={{pathname: '/Home', 
                             aboutProps: {
                                 Todos: this.state.Todos, 

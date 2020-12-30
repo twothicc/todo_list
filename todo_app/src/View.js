@@ -91,7 +91,7 @@ class View extends Component {
 
     //Waits for todo to be fetched and parsed. Handles null case. Need to be using window.location.hash instead since hashrouter is used now
     async fetchTodo() {
-        var temp = window.location.hash.split('/');
+        var temp = window.location.pathname.split('/');
         var id = temp[temp.length - 1];
         const response = await fetch(todo_api_url + "/" + this.state.user_id + '/' + id, {
             method: 'GET'

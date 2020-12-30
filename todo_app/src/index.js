@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { HashRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import View from './View';
 import Home from './Home';
 import Login from './Login';
 import Signup from './Signup';
 
 ReactDOM.render(
-  <HashRouter>
+  <BrowserRouter>
     <Switch>
         <Route exact path = "/Home" component = {Home}/>
         <Route exact path = "/Home/:id" component = {View}/>
@@ -20,7 +20,7 @@ ReactDOM.render(
     <React.StrictMode>
       <App />
     </React.StrictMode>
-  </HashRouter>,
+  </BrowserRouter>,
   document.getElementById('root')
 );
 
