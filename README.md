@@ -6,8 +6,11 @@ A0217691Y
 To see the app hosted on Heroku, visit:
 https://chenen-todo-list.herokuapp.com/
 You may use this account to see if you do not wish to create an account
+
 username: tester
+
 password: 1234
+
 The app may be a little laggy so if login does not work, please restart the app
 
 Setup (For local development)
